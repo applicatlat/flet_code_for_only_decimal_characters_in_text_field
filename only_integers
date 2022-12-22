@@ -1,0 +1,101 @@
+# This code is written by Levent Alahan Tekinalp. I just wanted to share that I am very happy to contribute 
+# to this project even if its a very small. One. Thank you for your efforts Feodor Fitsner
+
+import re
+
+import flet
+from flet import TextField, InputBorder, TextAlign, Column, Page, Text, ElevatedButton, CrossAxisAlignment, \
+    MainAxisAlignment, KeyboardEvent, colors, Container, \
+    padding, ResponsiveRow
+
+
+def only_integers(page: Page):
+    """
+    This is a little tutorial on how to make characters other than integers to not appear on the textfield
+    :param page:
+    :return:
+    """
+    global event_bool,data_bearer
+    event_bool = False
+    # this will come in hand when the textfield is triggered, it will carry its value to be able to make operations from
+    # it as e.control etc
+    data_bearer = None
+
+    def lost_focus_field(e):
+        """
+        when the field lost focus it should operate for the previous text field
+        :param e:
+        """
+        global event_bool, data_bearer
+        if e.control.data == "only":
+            event_bool = False
+            data_bearer.control.value = re.sub(r"\D", "", data_bearer.control.value)
+            data_bearer.control.update()
+
+    def on_change_field(e):
+        """
+
+        :param e:
+        """
+        global event_bool
+        if e.control.data == "only":
+            event_bool = True
+            e.control.value = re.sub(r"\D", "", e.control.value)
+            e.control.update()
+
+    def gain_focus_field(e):
+        """
+        When the textfield recieve focus it will update data_bearer
+        :param e:
+        """
+        global event_bool, data_bearer
+        if e.control.data == "only":
+            event_bool = True
+            data_bearer = e
+            e.control.value = re.sub(r"\D", "", e.control.value)
+            e.control.update()
+
+    kac_gunde_bir_field = TextField(label="Only Numbers Please", data="only",
+                                    on_change=on_change_field, on_focus=gain_focus_field,
+                                    on_blur=lost_focus_field,
+                                    width=page.width / 4, content_padding=5,
+                                    text_align=TextAlign.CENTER,
+                                    border=InputBorder.UNDERLINE, max_lines=1, max_length=4)
+
+    def button_listener(e):
+        """
+        If you need an explanation for this function you are in the wrong page
+        :param e:
+        """
+        if e.control.data == "error_close":
+            error_container.visible = False
+            error_container.update()
+
+    error_container = Container(content=ResponsiveRow([
+        Column([Text("You have made a vital mistake by not pressing an integer value. You must kill yourself "
+                     "immediately.", color=colors.WHITE, text_align=TextAlign.JUSTIFY),
+                ElevatedButton(text="I WILL", bgcolor=colors.DEEP_PURPLE_900,
+                               data="error_close", on_click=button_listener, width=120)],
+               horizontal_alignment=CrossAxisAlignment.CENTER, alignment=MainAxisAlignment.CENTER)]), visible=False,
+        border_radius=25,
+        bgcolor=colors.RED_ACCENT_700, width=page.width / 4, padding=padding.all(10))
+
+    def keyboard_event_tracker(e: KeyboardEvent):
+        if event_bool:
+            # not all the keyboard strokes returns single character. For instance when we click ESC button it prints Esc
+            # or when we press on numpad numbers it will return as Numpad 0 Numpad 5 thus length of it must be constained
+            # doing so will automatically kill the process by return
+            if len(e.key) > 1:
+                return
+            elif not e.key.isdecimal():
+                print("called")
+                error_container.visible = True
+                error_container.update()
+
+    # it is called everytime a key is pressed within this page.
+    page.on_keyboard_event = keyboard_event_tracker
+
+    page.add(kac_gunde_bir_field,error_container)
+
+
+flet.app(target=only_integers)
