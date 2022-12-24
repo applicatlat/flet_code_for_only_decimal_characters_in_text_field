@@ -1,6 +1,3 @@
-# This code is written by Levent Alahan Tekinalp. I just wanted to share that I am very happy to contribute 
-# to this project even if its a very small. One. Thank you for your efforts Feodor Fitsner
-
 import re
 
 import flet
@@ -60,7 +57,7 @@ def only_integers(page: Page):
                                     on_blur=lost_focus_field,
                                     width=page.width / 4, content_padding=5,
                                     text_align=TextAlign.CENTER,
-                                    border=InputBorder.UNDERLINE, max_lines=1, max_length=4)
+                                    border=InputBorder.UNDERLINE, max_lines=1)
 
     def button_listener(e):
         """
@@ -69,10 +66,12 @@ def only_integers(page: Page):
         """
         if e.control.data == "error_close":
             error_container.visible = False
+            data_bearer.control.disabled = False
+            data_bearer.control.update()
             error_container.update()
 
     error_container = Container(content=ResponsiveRow([
-        Column([Text("You have made a vital mistake by not pressing an integer value. You must kill yourself "
+        Column([Text("You have made a vital mistake by not entering an integer value. You must kill yourself "
                      "immediately.", color=colors.WHITE, text_align=TextAlign.JUSTIFY),
                 ElevatedButton(text="I WILL", bgcolor=colors.DEEP_PURPLE_900,
                                data="error_close", on_click=button_listener, width=120)],
@@ -90,6 +89,8 @@ def only_integers(page: Page):
             elif not e.key.isdecimal():
                 print("called")
                 error_container.visible = True
+                data_bearer.control.disabled=True
+                data_bearer.control.update()
                 error_container.update()
 
     # it is called everytime a key is pressed within this page.
